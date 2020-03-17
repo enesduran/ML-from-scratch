@@ -1,9 +1,11 @@
 import csv 
 import random
+import numpy as np
+np.set_printoptions(precision=2)
 
-def classifier(threshold):
+def classifier(threshold,fileName):
     new_data=csv.writer(open("Classified_Admission.csv","w",newline=""))   
-    with open('Admission_Predict.csv') as f:
+    with open(fileName) as f:
         data = list(csv.reader(f))
         for row in data:
             if float(row[8])<threshold:
@@ -32,3 +34,17 @@ def split_data(test_data_size,reg_train,class_train,reg_test,class_test):
         class_test_data.writerow(class_data[i])
         reg_test_data.writerow(reg_data[i])
     return 
+
+def PCA(fileName):
+    file=open(fileName)
+    file=list(csv.reader(file))
+    # Serial no and the probability are ignored for PCA 
+    arr=np.zeros((500,6))
+    for i in range(500):
+        for j in range(6):
+            arr[i][j]=file[i][j+1]
+    print(str(arr))          
+    singular_values=np.linalg.svd(arr, full_matrices=False, compute_uv=False)
+    principal_components=np.multiply(singular_values,singular_values)
+    print('Lengths of the principal components are '+str(principal_components)+'\n')
+    return

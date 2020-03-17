@@ -37,7 +37,7 @@ def kNN(k,reg_train,reg_test,test_data_size):
             predict=predict+float(reg_train_data[indexes[k-1]][8])
         predictions[x]=predict/k
     errorCalculation(predictions,reg_test_data)
-    #np.set_printoptions(formatter={'float_kind':float_formatter})
+    print('Predictions are')
     print(numpy.array(predictions))   
     return 
 
@@ -55,5 +55,5 @@ def errorCalculation(predictions,reg_test_data):
     for i in range(length):
         error+=abs(predictions[i]-float(reg_test_data[i][8]))/float(reg_test_data[i][8])
     error=100*error/length
-    print('The average prediction error percentage is {0:.2f}'.format(error))
+    print('The average prediction error percentage is {0:.2f} \n'.format(error))
     return error
