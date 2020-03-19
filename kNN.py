@@ -19,8 +19,6 @@ def kNN(k,reg_train,reg_test,test_data_size):
             # distance is l2 norm
             distance=0
             for y in range(1,7):
-                #print("y",y)
-                #print("x",x)
                 distance+=(float(reg_train_data[r][y])-float(reg_test_data[x][y]))**2
             if r<k:
                 closestK[r]=distance
