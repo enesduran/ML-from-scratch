@@ -1,5 +1,3 @@
-import numpy as np
-
 def f1_score(y_test,y_predicted):
     tp,fp,tn,fn=0
     for i in range(len(y_test)):
