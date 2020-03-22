@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 class DecisionTree():
     
@@ -8,7 +9,10 @@ class DecisionTree():
         self.min_info_gain=min_info_gain
         self.min_number_of_division=min_number_of_division
     
-    def split():
+    def split(self):
+        y,y1,y2=0
+        if self.information_gain(y,y1,y2)>self.min_info_gain:
+            pass
         return
     
     def train(X,y):
@@ -17,6 +21,26 @@ class DecisionTree():
     def test(x):
         result=0
         return result
+    
+    # calculate info gain 
+    def information_gain(self,y,y1,y2):
+        prob=len(y1)/len(y)
+        info_gain=self.entropy(y)-self.entropy(y1)*prob+self.entropy(y2)*(1-prob)
+        return info_gain
+    
+    # entropy calculation of a node
+    def entropy(y):
+        # there will always be 2 classes at max
+        entropy=0
+        # determining number of classes
+        if (0 in y) and (1 in y):
+            class_number=2
+        else:
+            class_number=1 
+        for i in class_number:
+            probability=len(y[y == i])/len(y)
+            entropy+= probability*math.log(probability,2)
+        return entropy
     
     # return the predictions in an array 
     def predict(X_test):
