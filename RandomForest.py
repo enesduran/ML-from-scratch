@@ -1,24 +1,37 @@
+import csv
 import math
+import random
 import numpy as np
 from DecisionTree import DecisionTree
+
 
 class Random_Forest(DecisionTree):
     """Random forest class which consists of Decision_Tree() class"""
     # X is the and y is class label
-    def __init__(self,number_of_trees=15, min_info_gain=0.05, min_number_of_division=2):
+    def __init__(self,number_of_trees=15, min_info_gain=0.05,class_train,class_test, min_number_of_division=2):
+        # Labels are appended to X_train & X_test
+        self.X_train=np.array(csv.reader(class_train,'r'))
+        self.X_test=np.array(csv.reader(class_test,'r'))
+        # parameter initialization
         self.number_of_trees=number_of_trees
         self.min_info_gain=min_info_gain
         self.min_number_of_division=min_number_of_division
-        # list of decision trees
+        # feature names
+        feature_names=['GRE','TOEFL','University Rating','SOP','LOR','CGPA','Research']
+        feature_number_for_each_tree=math.ceil(math.sqrt(len(feature_names)))
         forest=[]
-    
+        
         # initialization of decision trees 
         for i in range(number_of_trees):
-            
-            
+            indexes=random.sample(range(len(feature_names)), feature_number_for_each_tree)
+            [feature_1,feature_2]=feature_names(indexes)
+            tree=DecisionTree(feature_1,feature_2,min_info_gain)
+            tree.__init__()
+            data_sample=get_random_subsets()
+            tree.train()
             forest.append(train())
             pass
-    
+        
     def split_data():
         
         return
@@ -43,28 +56,18 @@ class Random_Forest(DecisionTree):
             probability=len(y[y == i])/len(y)
             entropy+= probability*math.log(probability,2)
         return entropy
-    
-    # training all decision trees the incoming data 
-    def train():
-        tree=DecisionTree()
-        # filling the subsets
-        for i in range(subset_number):
-        tree.__init__()
-        return tree
-   
+ 
     # make prediction by voting
-    def predict(self,test_data,number_of_trees):
+    def predict(forest,test_data,number_of_trees):
         prediction=np.zeros(test_data.shape[0])
         for i in range(len(prediction)):
             for j in range(number_of_trees):
-                pass
+                tree=forest[j]
+                tree
         return 
     
     # random division of data samples and features with replacement
-    def get_random_subsets(X,y,subsample_size):
-        # names of features for visulaizing tree
-        feature_names=['GRE','TOEFL','University Rating','SOP','LOR','CGPA','Research']
-        feature_number_for_each_tree=math.ceil(math.sqrt(len(feature_names)))
+    def get_random_subsets(self,subsample_size):
         # number of samples 
         n_samples = np.shape(X)[0]
         # Concatenate x and y and do a random shuffle
@@ -72,11 +75,9 @@ class Random_Forest(DecisionTree):
         np.random.shuffle(Xy)
         subsets = []
         subsample_size = n_samples
-        
+        for i in range(subsample_size)
             idx = np.random.choice(range(n_samples),size=np.shape(range(subsample_size)))
             X = Xy[idx][:, :-1]
             y = Xy[idx][:, -1]
-            feature_1
-            feature_2
-            subsets.append([X, y,feature_1,feature_2])
+            subsets.append([X, y])
         return subsets
