@@ -2,11 +2,11 @@ import numpy as np
 
 class DecisionTree():
     
-    def __init__(self,feature_1,feature_2,min_info_gain):
+    def __init__(self,feature_1,feature_2,min_info_gain,min_number_of_division):
         self.feature_1=feature_1
         self.feature_2=feature_2
         self.min_info_gain=min_info_gain
-        return
+        self.min_number_of_division=min_number_of_division
     
     def split():
         return

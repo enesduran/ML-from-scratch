@@ -8,30 +8,28 @@ from DecisionTree import DecisionTree
 class Random_Forest(DecisionTree):
     """Random forest class which consists of Decision_Tree() class"""
     # X is the and y is class label
-    def __init__(self,number_of_trees=15, min_info_gain=0.05,class_train,class_test, min_number_of_division=2):
+    def __init__(self,class_train,class_test,min_division=2,min_info_gain=0.05,number_of_trees=15):
         # Labels are appended to X_train & X_test
-        self.X_train=np.array(csv.reader(class_train,'r'))
-        self.X_test=np.array(csv.reader(class_test,'r'))
+        self.X_train=np.array(csv.reader(open(class_train,'r')))
+        self.X_test=np.array(csv.reader(open(class_test,'r')))
         # parameter initialization
         self.number_of_trees=number_of_trees
         self.min_info_gain=min_info_gain
-        self.min_number_of_division=min_number_of_division
+        self.min_division=min_division
         # feature names
         feature_names=['GRE','TOEFL','University Rating','SOP','LOR','CGPA','Research']
         feature_number_for_each_tree=math.ceil(math.sqrt(len(feature_names)))
         forest=[]
+        [feature_1,feature_2]=[0,0]
         
         # initialization of decision trees 
         for i in range(number_of_trees):
             indexes=random.sample(range(len(feature_names)), feature_number_for_each_tree)
-            [feature_1,feature_2]=feature_names(indexes)
-            tree=DecisionTree(feature_1,feature_2,min_info_gain)
-            tree.__init__()
-            data_sample=get_random_subsets()
-            tree.train()
-            forest.append(train())
-            pass
-        
+            feature_1=feature_names[indexes[0]]
+            feature_2=feature_names[indexes[1]]
+            tree=DecisionTree(feature_1,feature_2,min_info_gain,min_division)
+            forest.append(tree.train(self.get_random_subsets()))
+          
     def split_data():
         
         return
@@ -67,17 +65,13 @@ class Random_Forest(DecisionTree):
         return 
     
     # random division of data samples and features with replacement
-    def get_random_subsets(self,subsample_size):
+    def get_random_subsets(self,subsample_size=50):
         # number of samples 
-        n_samples = np.shape(X)[0]
-        # Concatenate x and y and do a random shuffle
-        Xy = np.concatenate((X, y.reshape((1, len(y))).T), axis=1)
-        np.random.shuffle(Xy)
-        subsets = []
-        subsample_size = n_samples
-        for i in range(subsample_size)
+        n_samples = np.shape(self.X_train)[0]
+        X_shuffled=np.random.shuffle(self.X_train)
+        for i in range(subsample_size):
             idx = np.random.choice(range(n_samples),size=np.shape(range(subsample_size)))
             X = Xy[idx][:, :-1]
             y = Xy[idx][:, -1]
-            subsets.append([X, y])
-        return subsets
+            subset.append([X, y])
+        return subset

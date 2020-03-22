@@ -27,5 +27,5 @@ PCA(normalizedFile)
 # kNN algorithm
 kNN(k,reg_train,reg_test,test_data_size)
 # implementing random forest
-Random_Forest() 
-#svm()
+Random_Forest(class_train,class_test) 
+# implementing svm
