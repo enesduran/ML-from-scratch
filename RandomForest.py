@@ -19,35 +19,39 @@ class Random_Forest(DecisionTree):
         self.min_division=min_division
         # feature names
         feature_names=['GRE','TOEFL','University Rating','SOP','LOR','CGPA','Research']
-        feature_number_for_each_tree=math.ceil(math.sqrt(len(feature_names)))
+        feature_number_for_each_tree=math.floor(math.sqrt(len(feature_names)))
         forest=[]
         [feature_1,feature_2]=[0,0]
         
         # initialization of decision trees 
         for i in range(number_of_trees):
             indexes=random.sample(range(len(feature_names)), feature_number_for_each_tree)
+            if indexes[0]>indexes[1]:
+                indexes[0],indexes[1]=indexes[1],indexes[0]
             feature_1=feature_names[indexes[0]]
             feature_2=feature_names[indexes[1]]
             tree=DecisionTree(feature_1,feature_2,min_info_gain,min_division)
             forest.append(tree.train(self.get_random_subsets(indexes)))
         # making predictions and calculating the f1 score
-        pred=self.predict(forest,self.X_test,number_of_trees)
+        pred=self.prediction(forest,number_of_trees)
         f1_score([row[8] for row in self.X_test],pred)
     
     # make prediction by voting
-    def predict(forest,test_data,number_of_trees):
-        prediction=np.zeros(test_data.shape[0])
-        for i in range(len(prediction)):
+    def prediction(self,forest,number_of_trees):
+        predictions=np.zeros(len(self.X_test))
+        for i in range(len(predictions)):
             for j in range(number_of_trees):
-                prediction+=forest[j].predict(test_data)
-        prediction=prediction[prediction>7]    
-        return prediction
+                # OK. It works
+                #print(self.X_test)
+                predictions+=forest[j].prediction(self.X_test)
+        predictions=predictions[predictions>7]    
+        return predictions
     
     # random division of data samples and features with replacement
     def get_random_subsets(self,indexes,subsample_size=50):
-        print(self.X_train)
-        X_shuffled=list(np.random.shuffle(self.X_train))
-        print(X_shuffled)
-        subset=X_shuffled[1:subsample_size][:]
-        subset=subset[:][indexes[0],indexes[1]]
-        return subset
+        X_shuffled=random.sample(self.X_train,len(self.X_train))        
+        temp=X_shuffled[1:subsample_size][:]
+        print('The indexes are ',indexes)
+        subset0=[[row[indexes[1]],row[indexes[0]]] for row in temp]
+        print(subset0)
+        return subset0
