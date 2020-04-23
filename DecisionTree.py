@@ -3,64 +3,93 @@ import math
 
 class Node:
         # if not initialized it will be counted as leaf node
-        def __int__(self,feature_index,threshold=None,right=None,left=None,value=None):
-            # threshold for division
-            self.threshold=threshold
+        def __init__(self,feature_index=None,depth=None,threshold=None,right=None,left=None,leaf_value=None):
             # index of criteria feature for division of branches.
             self.feature_index=feature_index
+            # depth of the decision node
+            self.depth=depth
+            # threshold for division
+            self.threshold=threshold
             # the values higher than threshold will be put right node
             self.right=right
             # left subtreee
             self.left=left
+            # The node is not a leaf node. Hence feature index is important
+            self.leaf_value=None
             # the value of the node if it is leaf
             if right is None and left is None:
-                self.value=value
-            else:
-                self.value=None
-            return 
+                self.leaf_value=leaf_value
+        
+        def get_feature_index(self):
+            return self.feature_index
         
 class DecisionTree:
     
-    def __init__(self,Xy,feature_1,feature_2,min_info_gain,min_number_of_division):
+    def __init__(self,Xy,feature_1,feature_2,min_info_gain,max_depth=4):
         # declare a root node to build tree
         feature_names=['GRE','TOEFL','University Rating','SOP','LOR','CGPA','Research']
         self.features=[0,0]
         # feature_1 & 2 are the indexes of the features
         self.features[0]=feature_1
         self.features[1]=feature_2
+        self.feature_name_1=feature_names[feature_1]
+        self.feature_name_2=feature_names[feature_2]
         self.min_info_gain=min_info_gain
-        self.min_number_of_division=min_number_of_division
         self.Xy=Xy
-        self.root=self.train(Xy)
-            
-    def train(self,X_y):
+        self.max_depth=max_depth
+        self.root=self.train(Xy,0)
+        
+    # The incoming          
+    def train(self,X_y,cur_depth):
         """Building tree by constructing nodes. Calls split_by_feature method to split the data """
-        r,_=X_y.shape
-        if r==1:
-            return Node()
+        if len(X_y)==1:
+            print("X_y is ", X_y)
+            # A leaf node with a single data point. 
+            return Node(leaf_value=X_y[0])
         else:
-            for feature_number in range(len(self.features)):
-                best_split_gain=0    
-                unique_vals=np.unique(X_y[:,feature_number])
-                #print(unique_vals)
-                for threshold in unique_vals:
-                    # Splitted data according to threshold
-                    Xr,Xl=self.split_by_feature(X_y,feature_number,threshold)
-                    if not (len(X_y)==0 or len(Xr)==0 or len(Xl)==0):
-                        # Now it is time to look the information gain to justify split 
-                        temp=X_y[:,2]
-                        temp_r=np.array(Xr[row[2]] for row in Xr)
-                        temp_l=np.array(Xl[row[2]] for row in Xl)
-                        print(temp_r)
-                        print(temp_l)
-                        split_gain=self.information_gain(temp,temp_r,temp_l)
-                        # Check whether it is the best split 
-                        if split_gain>best_split_gain:
-                            best_split_gain=split_gain
-                            idx=feature_number
-                            best_threshold=threshold
-        return Node(idx,best_threshold)
-      
+            if cur_depth<self.max_depth:
+                right_data=0
+                left_data=0
+                # best split gain will be calculated with loops over features and thresholds
+                best_split_gain=0
+                for feature_number in range(len(self.features)):
+                    unique_vals=np.unique(np.array(X_y)[:,feature_number])
+                    #print(unique_vals)
+                    for threshold in unique_vals:
+                        # Splitted data according to threshold
+                        Xr,Xl=self.split_by_feature(X_y,feature_number,threshold)
+                        if not (len(X_y)==0 or len(Xr)==0 or len(Xl)==0):
+                            # Now it is time to look the information gain to justify split 
+                            temp=list([row[2] for row in X_y])
+                            temp_r=list([row[2] for row in Xr])
+                            temp_l=list([row[2] for row in Xl])
+                            split_gain=self.information_gain(temp,temp_r,temp_l)
+                            # Check whether it is the best split 
+                            if split_gain>best_split_gain:
+                                # dataset update
+                                right_data,left_data=Xr,Xl
+                                best_split_gain=split_gain
+                                idx=feature_number
+                                best_threshold=threshold
+                if best_split_gain>=self.min_info_gain:
+                    # recursive approach to extend 
+                    right_branch=self.train(right_data,cur_depth+1)
+                    left_branch=self.train(left_data,cur_depth+1)
+                    new_node=Node(self,idx,cur_depth,best_threshold,right_branch,left_branch)
+                    return new_node
+                
+            # this means the node is leaf node
+            leaf_label=self.assign_label(X_y)             
+            return Node(leaf_value=leaf_label)
+     
+    def assign_label(self,X_y):
+        """assign most repetitive label as the label of the leaf node"""
+        y=[row[2] for row in X_y]
+        label=0
+        if y.count(1)>y.count(0):
+            label=1
+        return label
+    
     # recursive method    
     def split_by_feature(self,data,feature_number,threshold):
         """Divide the data into two according to the threshold on feature number"""
@@ -76,42 +105,44 @@ class DecisionTree:
    
     def predict(self,x,node=None):
         """Makes the prediction of single data point"""
+        # starting tree by assigning node
         if node is None:
             node=self.root
-        else:
-            # This means the node is leaf node
-            if (node.left is None and node.right is None):
-                return node.value
-            # continue searching
-            else:
-                # left branch
-                if x[node.feature_index]<node.threshold:
-                    branch=node.left    
-                # right branch    
-                else:
-                    branch=node.right
+            
+        # Check if it is a leaf node
+        if (node.left is None and node.right is None):
+            return node.leaf_value
+        
+        branch=node.right
+        print(node.feature_index)
+        # assign next branch
+        if x[node.get_feature_index()]<node.threshold:
+            branch=node.left    
         return self.predict(x,branch)
     
     # calculate info gain 
     def information_gain(self,y,y1,y2):
-        # y1 is empty
         prob=len(y1)/len(y)
-        info_gain=self.entropy(y)-self.entropy(y1)*prob+self.entropy(y2)*(1-prob)
+        info_gain=self.entropy(y)
+        info_gain=info_gain-self.entropy(y1)*prob+self.entropy(y2)*(1-prob)
         return info_gain
     
     # entropy calculation of a node
-    def entropy(y):
+    def entropy(self,y):
         # there will always be 2 classes at max
         entropy=0
+        #print(list(y).count(0))
+        #print(list(y).count(1))
         # determining number of classes
-        if (0 in y) and (1 in y):
-            class_number=2
+        if not (y.count(0)>0) and (y.count(1)>0):
+            class_number=1
+            return entropy
         else:
-            class_number=1 
-        for i in class_number:
-            probability=len(y[y == i])/len(y)
-            entropy+= probability*math.log(probability,2)
-        return entropy
+            class_number=2 
+            for i in range(class_number):
+                probability=len(y[y == i])/len(y)
+                entropy+= probability*math.log(probability,2)
+            return entropy
      
     def predictionArray(self,X_test):
         """returns the predictions in an array"""

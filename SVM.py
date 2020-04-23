@@ -109,8 +109,3 @@ class SupportVectorMachine(object):
     # checking wheter positive definite or not         
     def is_pos_def(self):
         return np.all(np.linalg.eigvals(self.P) > 0)
-      
-    
-        
-        
-        

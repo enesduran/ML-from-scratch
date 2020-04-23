@@ -9,7 +9,7 @@ from evaluation import f1_score
 class Random_Forest(DecisionTree):
     """Random forest class which consists of Decision_Tree() class"""
     # X is the and y is class label
-    def __init__(self,class_train,class_test,min_division=2,min_info_gain=0.05,number_of_trees=15):
+    def __init__(self,class_train,class_test,min_division=2,min_info_gain=0.00005,number_of_trees=15):
         # Labels are appended to X_train & X_test
         self.X_train=list(csv.reader(open(class_train,'r')))
         self.X_test=list(csv.reader(open(class_test,'r')))
@@ -24,7 +24,7 @@ class Random_Forest(DecisionTree):
         for i in range(number_of_trees):
             feature_indexes=random.sample(range(1,7),feature_number_for_each_tree)
             tree=DecisionTree(self.get_random_subsets(feature_indexes),feature_indexes[0],feature_indexes[1],min_info_gain,min_division)
-            # Add tree instance to forest
+            # Decision tree class automatically calls the train method 
             forest.append(tree)
         # making predictions and calculating the f1 score
         pred=self.prediction(forest,number_of_trees)
@@ -37,7 +37,8 @@ class Random_Forest(DecisionTree):
             # elementwise addition
             jth_predictior=forest[j].predictionArray(self.X_test)
             predictions=[predictions[i]+jth_predictior[i] for i in range(len(predictions))] 
-            predictions=[int(predictions[i]>7) for i in range(len(predictions))]    
+            predictions=[int(predictions[i]>7) for i in range(len(predictions))]
+            print("Predictions of Random Forest is",predictions)
         return predictions
     
     # random division of data samples and features with replacement
