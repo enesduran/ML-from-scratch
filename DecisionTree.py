@@ -6,7 +6,7 @@ class Node:
         def __int__(self,feature_index,threshold=None,right=None,left=None,value=None):
             # threshold for division
             self.threshold=threshold
-            # feature index corresponding the division. Takes either 0 or 1.
+            # index of criteria feature for division of branches.
             self.feature_index=feature_index
             # the values higher than threshold will be put right node
             self.right=right
@@ -42,15 +42,17 @@ class DecisionTree:
             for feature_number in range(len(self.features)):
                 best_split_gain=0    
                 unique_vals=np.unique(X_y[:,feature_number])
-                print(unique_vals)
+                #print(unique_vals)
                 for threshold in unique_vals:
                     # Splitted data according to threshold
                     Xr,Xl=self.split_by_feature(X_y,feature_number,threshold)
-                    if not (len(X_y) or len(Xr)==0 or len(Xl)==0):
+                    if not (len(X_y)==0 or len(Xr)==0 or len(Xl)==0):
                         # Now it is time to look the information gain to justify split 
                         temp=X_y[:,2]
                         temp_r=np.array(Xr[row[2]] for row in Xr)
                         temp_l=np.array(Xl[row[2]] for row in Xl)
+                        print(temp_r)
+                        print(temp_l)
                         split_gain=self.information_gain(temp,temp_r,temp_l)
                         # Check whether it is the best split 
                         if split_gain>best_split_gain:
@@ -72,20 +74,27 @@ class DecisionTree:
                 print(X_left)
         return X_right,X_left
    
-    def predict(self,X,node=None):
-        result=0
+    def predict(self,x,node=None):
+        """Makes the prediction of single data point"""
         if node is None:
             node=self.root
         else:
             # This means the node is leaf node
             if (node.left is None and node.right is None):
-                for row in X:
-                    pass
-        
-        return result
+                return node.value
+            # continue searching
+            else:
+                # left branch
+                if x[node.feature_index]<node.threshold:
+                    branch=node.left    
+                # right branch    
+                else:
+                    branch=node.right
+        return self.predict(x,branch)
     
     # calculate info gain 
     def information_gain(self,y,y1,y2):
+        # y1 is empty
         prob=len(y1)/len(y)
         info_gain=self.entropy(y)-self.entropy(y1)*prob+self.entropy(y2)*(1-prob)
         return info_gain
@@ -103,14 +112,11 @@ class DecisionTree:
             probability=len(y[y == i])/len(y)
             entropy+= probability*math.log(probability,2)
         return entropy
-    
-    # return the predictions in an array 
-    def predict(X_test):
-        [m,n]=X_test.shape
-        y_predict=np.zeros(m)
-        # iterating over data points
-        idx=[i for i in m]
-        y_predict=y_predict[X_test[idx]==1]
-#         for i in range(len(y_predict)):
-#             if test(X_test[i])==1:
+     
+    def predictionArray(self,X_test):
+        """returns the predictions in an array"""
+        y_predict=[]
+        # Filling the array of prediction
+        for row in X_test:
+            y_predict.append(self.predict(row))
         return y_predict

@@ -33,20 +33,17 @@ class Random_Forest(DecisionTree):
     # make prediction by voting
     def prediction(self,forest,number_of_trees):
         predictions=np.zeros(len(self.X_test))
-        for i in range(len(predictions)):
-            for j in range(number_of_trees):
-                # OK. It works
-                #print(self.X_test)
-                predictions+=forest[j].predict(self.X_test)
-        predictions=predictions[predictions>7]    
+        for j in range(number_of_trees):
+            # elementwise addition
+            jth_predictior=forest[j].predictionArray(self.X_test)
+            predictions=[predictions[i]+jth_predictior[i] for i in range(len(predictions))] 
+            predictions=[int(predictions[i]>7) for i in range(len(predictions))]    
         return predictions
     
     # random division of data samples and features with replacement
     def get_random_subsets(self,indexes,subsample_size=51):
         X_shuffled=random.sample(self.X_train,len(self.X_train))        
         temp=X_shuffled[1:subsample_size][:]
-        print('The indexes are ',indexes)
         # The label will be included
         Xy=np.array([[row[indexes[1]],row[indexes[0]],row[8]] for row in temp])
-        print(Xy)
         return Xy
