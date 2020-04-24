@@ -56,28 +56,30 @@ class DecisionTree:
                 right_data=0
                 left_data=0    
                 for feature_number in range(len(self.features)):
-                    unique_vals=np.unique(np.array(X_y)[:,feature_number])
+                    unique_vals=list(np.unique(np.array(X_y)[:,feature_number]))
                     #print(unique_vals)
                     for threshold in unique_vals:
                         # Splitted data according to threshold
                         Xr,Xl=self.split_by_feature(X_y,feature_number,threshold)
-                        if not (len(X_y)==0 or len(Xr)==0 or len(Xl)==0):
-                            # Now it is time to look the information gain to justify split 
-                            temp=list([row[2] for row in X_y])
-                            temp_r=list([row[2] for row in Xr])
-                            temp_l=list([row[2] for row in Xl])
-                            split_gain=self.information_gain(temp,temp_r,temp_l)
-                            # Check whether it is the best split 
-                            if split_gain>best_split_gain:
-                                # dataset update
-                                right_data,left_data=Xr,Xl
-                                best_split_gain=split_gain
-                                idx=feature_number
-                                best_threshold=threshold
+                        if not ( X_y is None or Xr is None or Xl is None):
+                            if (len(X_y)>4 and len(Xr)>4 and len(Xl)>4):
+                                print("X_y {} Xr {} Xl {}".format(len(X_y),len(Xr),len(Xl)))
+                                # Now it is time to look the information gain to justify split 
+                                temp=list([row[2] for row in X_y])
+                                temp_r=list([row[2] for row in Xr])
+                                temp_l=list([row[2] for row in Xl])
+                                split_gain=self.information_gain(temp,temp_r,temp_l)
+                                # Check whether it is the best split 
+                                if split_gain>best_split_gain:
+                                    # dataset update
+                                    right_data,left_data=Xr,Xl
+                                    best_split_gain=split_gain
+                                    idx=feature_number
+                                    best_threshold=threshold
+                            
             if best_split_gain>=self.min_info_gain:
                 # recursive approach to extend 
-                print(right_data)
-                print(left_data)
+                print("Best possible division is ",len(right_data),len(left_data))
                 right_branch=self.train(right_data,cur_depth+1)
                 left_branch=self.train(left_data,cur_depth+1)
                 new_node=Node(self,idx,cur_depth,best_threshold,right_branch,left_branch)
@@ -105,7 +107,8 @@ class DecisionTree:
                 X_left.append(row)
             else:
                 X_right.append(row)
-                print(X_left)
+        if (len(X_left)==0 or len(X_right)==0):
+            [X_right,X_left]=[None,None]
         return X_right,X_left
    
     def predict(self,x,node=None):
@@ -113,16 +116,14 @@ class DecisionTree:
         # starting tree by assigning node
         if node is None:
             node=self.root
-        #print(node.left)
-        #print(node.right)
+            
         # Check if it is a leaf node
-        if (node.left is None and node.right is None):
+        if (Node(node).left is None and Node(node).right is None):
             return node.leaf_value
         
         branch=node.right
-        
         # assign next branch
-        if node.get_feature_index()==None:
+        if x[node.get_feature_index()]<node.threshold:
             print("Ahanda nanay")
             branch=node.left    
         return self.predict(x,branch)
@@ -138,8 +139,6 @@ class DecisionTree:
     def entropy(self,y):
         # there will always be 2 classes at max
         entropy=0
-        #print(list(y).count(0))
-        #print(list(y).count(1))
         # determining number of classes
         if not (y.count(0)>0) and (y.count(1)>0):
             class_number=1
@@ -147,6 +146,7 @@ class DecisionTree:
         else:
             class_number=2 
             for i in range(class_number):
+                #print("length of y is ",len(y))
                 probability=len(y[y == i])/len(y)
                 entropy+= probability*math.log(probability,2)
             return entropy

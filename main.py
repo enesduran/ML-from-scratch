@@ -28,12 +28,11 @@ class_train="Classification_Train.csv"
 classifier(threshold,fileName,normalizedFile)
 split_data(test_data_size,reg_train,class_train,reg_test,class_test)
 # SVM algorithm
-SVM_machine(class_train,class_test)
+#SVM_machine(class_train,class_test)
 
 # # pca
 # PCA(normalizedFile)
 # # kNN algorithm
 # kNN(k,reg_train,reg_test,test_data_size)
 # # implementing random forest
-# Random_Forest(class_train,class_test) 
-# # implementing svm
+Random_Forest(class_train,class_test) 
