@@ -38,20 +38,23 @@ class DecisionTree:
         self.Xy=Xy
         self.max_depth=max_depth
         self.root=self.train(Xy,0)
-        
-    # The incoming          
+                  
     def train(self,X_y,cur_depth):
         """Building tree by constructing nodes. Calls split_by_feature method to split the data """
         if len(X_y)==1:
             print("X_y is ", X_y)
             # A leaf node with a single data point. 
-            return Node(leaf_value=X_y[0])
+            value=X_y[0][2]
+            print("value is ",value)
+            return Node(leaf_value=value)
         else:
+            # best split gain will be calculated with loops over features and thresholds
+            best_split_gain=0
+            
+            # requirements for division
             if cur_depth<self.max_depth:
                 right_data=0
-                left_data=0
-                # best split gain will be calculated with loops over features and thresholds
-                best_split_gain=0
+                left_data=0    
                 for feature_number in range(len(self.features)):
                     unique_vals=np.unique(np.array(X_y)[:,feature_number])
                     #print(unique_vals)
@@ -71,12 +74,14 @@ class DecisionTree:
                                 best_split_gain=split_gain
                                 idx=feature_number
                                 best_threshold=threshold
-                if best_split_gain>=self.min_info_gain:
-                    # recursive approach to extend 
-                    right_branch=self.train(right_data,cur_depth+1)
-                    left_branch=self.train(left_data,cur_depth+1)
-                    new_node=Node(self,idx,cur_depth,best_threshold,right_branch,left_branch)
-                    return new_node
+            if best_split_gain>=self.min_info_gain:
+                # recursive approach to extend 
+                print(right_data)
+                print(left_data)
+                right_branch=self.train(right_data,cur_depth+1)
+                left_branch=self.train(left_data,cur_depth+1)
+                new_node=Node(self,idx,cur_depth,best_threshold,right_branch,left_branch)
+                return new_node
                 
             # this means the node is leaf node
             leaf_label=self.assign_label(X_y)             
@@ -108,15 +113,17 @@ class DecisionTree:
         # starting tree by assigning node
         if node is None:
             node=self.root
-            
+        #print(node.left)
+        #print(node.right)
         # Check if it is a leaf node
         if (node.left is None and node.right is None):
             return node.leaf_value
         
         branch=node.right
-        print(node.feature_index)
+        
         # assign next branch
-        if x[node.get_feature_index()]<node.threshold:
+        if node.get_feature_index()==None:
+            print("Ahanda nanay")
             branch=node.left    
         return self.predict(x,branch)
     
