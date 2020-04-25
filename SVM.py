@@ -69,10 +69,6 @@ class SupportVectorMachine(object):
         y_p=np.array(y_p,dtype=float)
         return y_p
  
-    # checking wheter positive definite or not         
-    def is_pos_def(self):
-        return np.all(np.linalg.eigvals(self.P) > 0)
-      
 # the error of the test data classification 
 def classError(y1,y2):
     missNum = 0

@@ -35,4 +35,5 @@ split_data(test_data_size,reg_train,class_train,reg_test,class_test)
 # # kNN algorithm
 # kNN(k,reg_train,reg_test,test_data_size)
 # # implementing random forest
+print(" RANDOM FOREST INITIALIZATION")
 Random_Forest(class_train,class_test) 

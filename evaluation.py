@@ -5,11 +5,11 @@
 def f1_score(y_test,y_predicted):
     tp,fp,tn,fn=0,0,0,0
     for i in range(len(y_test)):
-        if y_test[i]==0 and y_predicted[i]==0:
+        if (float(y_test[i])==0.0 and y_predicted[i]==0):
             tn+=1
-        elif y_test[i]==0 and y_predicted[i]==1:
+        elif (float(y_test[i])==0.0 and y_predicted[i]==1):
             fp+=1
-        elif y_test[i]==1 and y_predicted[i]==1:
+        elif (float(y_test[i])==1.0 and y_predicted[i]==1):
             tp+=1
         else:
             fn+=1

@@ -15,7 +15,7 @@ class Node:
             # left subtreee
             self.left=left
             # The node is not a leaf node. Hence feature index is important
-            self.leaf_value=None
+            self.leaf_value=self.leaf_value=leaf_value
             # the value of the node if it is leaf
             if right is None and left is None:
                 self.leaf_value=leaf_value
@@ -25,7 +25,7 @@ class Node:
         
 class DecisionTree:
     
-    def __init__(self,Xy,feature_1,feature_2,min_info_gain,max_depth=4):
+    def __init__(self,Xy,feature_1,feature_2,min_info_gain,max_depth=6,min_sample=5):
         # declare a root node to build tree
         feature_names=['GRE','TOEFL','University Rating','SOP','LOR','CGPA','Research']
         self.features=[0,0]
@@ -37,15 +37,15 @@ class DecisionTree:
         self.min_info_gain=min_info_gain
         self.Xy=Xy
         self.max_depth=max_depth
+        self.min_sample=min_sample
         self.root=self.train(Xy,0)
                   
     def train(self,X_y,cur_depth):
         """Building tree by constructing nodes. Calls split_by_feature method to split the data """
-        if len(X_y)==1:
-            print("X_y is ", X_y)
-            # A leaf node with a single data point. 
-            value=X_y[0][2]
-            print("value is ",value)
+        if len(X_y)<=self.min_sample:
+            # A leaf node 
+            value=self.assign_label(X_y)
+            print("leaf value is ",value)
             return Node(leaf_value=value)
         else:
             # best split gain will be calculated with loops over features and thresholds
@@ -61,8 +61,8 @@ class DecisionTree:
                     for threshold in unique_vals:
                         # Splitted data according to threshold
                         Xr,Xl=self.split_by_feature(X_y,feature_number,threshold)
-                        if not ( X_y is None or Xr is None or Xl is None):
-                            if (len(X_y)>4 and len(Xr)>4 and len(Xl)>4):
+                        if not (X_y is None or Xr is None or Xl is None):
+                            if (len(Xr)>=self.min_sample and len(Xl)>=self.min_sample):
                                 print("X_y {} Xr {} Xl {}".format(len(X_y),len(Xr),len(Xl)))
                                 # Now it is time to look the information gain to justify split 
                                 temp=list([row[2] for row in X_y])
@@ -72,29 +72,33 @@ class DecisionTree:
                                 # Check whether it is the best split 
                                 if split_gain>best_split_gain:
                                     # dataset update
+                                    print("reached")
                                     right_data,left_data=Xr,Xl
                                     best_split_gain=split_gain
-                                    idx=feature_number
+                                    idx=self.features[feature_number]
                                     best_threshold=threshold
                             
             if best_split_gain>=self.min_info_gain:
                 # recursive approach to extend 
-                print("Best possible division is ",len(right_data),len(left_data))
+                print("Best possible division Xr {} Xl {} best gain {}".format(len(right_data),len(left_data),best_split_gain))
                 right_branch=self.train(right_data,cur_depth+1)
                 left_branch=self.train(left_data,cur_depth+1)
-                new_node=Node(self,idx,cur_depth,best_threshold,right_branch,left_branch)
+                new_node=Node(idx,cur_depth,best_threshold,right_branch,left_branch)
+                print("new node threshold",best_threshold)
                 return new_node
                 
             # this means the node is leaf node
             leaf_label=self.assign_label(X_y)             
             return Node(leaf_value=leaf_label)
      
-    def assign_label(self,X_y):
+    def assign_label(self,data):
         """assign most repetitive label as the label of the leaf node"""
-        y=[row[2] for row in X_y]
+        y=[row[2] for row in data]
+        print("y is ",y)
         label=0
-        if y.count(1)>y.count(0):
+        if y.count("1.0")>y.count("0.0"):
             label=1
+        print("The label is ", label)
         return label
     
     # recursive method    
@@ -103,7 +107,7 @@ class DecisionTree:
         X_left=[]
         X_right=[]
         for row in data:
-            if row[feature_number]>=threshold:
+            if row[feature_number]<=threshold:
                 X_left.append(row)
             else:
                 X_right.append(row)
@@ -116,23 +120,36 @@ class DecisionTree:
         # starting tree by assigning node
         if node is None:
             node=self.root
+            #print("sürekli root")
             
         # Check if it is a leaf node
-        if (Node(node).left is None and Node(node).right is None):
+        if not(node.leaf_value is None):
+            print("sürekli leaf")
             return node.leaf_value
         
-        branch=node.right
+        if (node.right is None or node.left is None):
+            print("exception")
+            
+        
+        # thresh is non zero. Checked
+        thresh=node.threshold
+        feature_i=node.feature_index
+        #print("feature_i ",feature_i)
+        print("value is ",x[feature_i])
         # assign next branch
-        if x[node.get_feature_index()]<node.threshold:
-            print("Ahanda nanay")
-            branch=node.left    
+        if x[feature_i]<=thresh:
+            print("sola kaydı")
+            branch=node.left   
+        else:
+            branch=node.right
+            print("sağa kaydı")
         return self.predict(x,branch)
     
     # calculate info gain 
     def information_gain(self,y,y1,y2):
         prob=len(y1)/len(y)
-        info_gain=self.entropy(y)
-        info_gain=info_gain-self.entropy(y1)*prob+self.entropy(y2)*(1-prob)
+        info_gain=-self.entropy(y)+self.entropy(y1)*prob+self.entropy(y2)*(1-prob)
+        print("Info gain is ",info_gain )
         return info_gain
     
     # entropy calculation of a node
@@ -148,7 +165,7 @@ class DecisionTree:
             for i in range(class_number):
                 #print("length of y is ",len(y))
                 probability=len(y[y == i])/len(y)
-                entropy+= probability*math.log(probability,2)
+                entropy-= probability*math.log(probability,2)
             return entropy
      
     def predictionArray(self,X_test):
@@ -157,4 +174,5 @@ class DecisionTree:
         # Filling the array of prediction
         for row in X_test:
             y_predict.append(self.predict(row))
+        print("y predict",y_predict)
         return y_predict
