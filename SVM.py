@@ -4,6 +4,7 @@ import random
 from data_preprocess import calculateInputOutput
 from data_preprocess import convertSVM
 from scipy.optimize import minimize
+from evaluation import f1_score
 
 # the main method of support vector machine called by main method
 def SVM_machine(class_train,class_test):
@@ -17,12 +18,17 @@ def SVM_machine(class_train,class_test):
     [X_t, y_t] = calculateInputOutput(convertSVM(list(csv.reader(open(class_test,'r')))))
     # classifying the test data with the SVM machine
     y_p = SVM.predict(X_t)
+    # printing the label predictions
+    print('The SVM predictions are:')
+    print(np.array(y_p))  
     #calculating the prediction error on the test set and printing 
     error  = classError(y_p,y_t)
-    print('The average prediction error percentage is {0:.2f} \n'.format(error))
-    # calculating the 5 fold cross validation error
+    print('The SVM prediction error percentage is {0:.2f} \n'.format(error))
+    # calculating the 5 fold cross validation error takes a little time 
     cross_validation_error = crossValidationError()
-    print('The cross validation prediction error is {0:.2f} \n'.format(cross_validation_error))
+    print('The SVM cross validation prediction error is {0:.2f} \n'.format(cross_validation_error))
+    score = f1_score(y_t,y_p)
+    print('The SVM f1 score is {0:.2f} \n'.format(score))
 
 # the kernel type for linear hyperplane
 def linear_kernel(x1,x2):
@@ -68,7 +74,7 @@ class SupportVectorMachine(object):
             y_p.append(np.sign(prediction))
         y_p=np.array(y_p,dtype=float)
         return y_p
- 
+      
 # the error of the test data classification 
 def classError(y1,y2):
     missNum = 0
@@ -86,8 +92,8 @@ def crossValidationError():
     random.shuffle(new_data)
     error = 0
     for i in range (0,5):
-        test_data = class_data[i*100:(i+1)*100]
-        train_data = class_data[:]
+        test_data = new_data[i*100:(i+1)*100]
+        train_data = new_data[:]
         del train_data[i*100:(i+1)*100]
         [X,y] = calculateInputOutput(train_data)
         SVM = SupportVectorMachine()

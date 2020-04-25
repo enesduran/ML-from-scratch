@@ -1,6 +1,3 @@
-"""
-@author: Altan
-"""
 # model evaluation method for SVM and Random Forest  
 def f1_score(y_test,y_predicted):
     tp,fp,tn,fn=0,0,0,0

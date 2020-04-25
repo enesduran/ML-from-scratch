@@ -9,7 +9,7 @@ from evaluation import f1_score
 class Random_Forest(DecisionTree):
     """Random forest class which consists of Decision_Tree() class"""
     # X is the and y is class label
-    def __init__(self,class_train,class_test,min_division=2,min_info_gain=0.05,number_of_trees=15):
+    def __init__(self,class_train,class_test,min_division=2,min_info_gain=0.01,number_of_trees=15):
         # Labels are appended to X_train & X_test
         self.X_train=list(csv.reader(open(class_train,'r')))
         self.X_test=list(csv.reader(open(class_test,'r')))
@@ -42,7 +42,7 @@ class Random_Forest(DecisionTree):
         return predictions
     
     # random division of data samples and features with replacement
-    def get_random_subsets(self,indexes,subsample_size=51):
+    def get_random_subsets(self,indexes,subsample_size=200):
         X_shuffled=random.sample(self.X_train,len(self.X_train))        
         temp=X_shuffled[1:subsample_size][:]
         # The label will be included

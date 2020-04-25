@@ -20,9 +20,6 @@ class Node:
             if right is None and left is None:
                 self.leaf_value=leaf_value
         
-        def get_feature_index(self):
-            return self.feature_index
-        
 class DecisionTree:
     
     def __init__(self,Xy,feature_1,feature_2,min_info_gain,max_depth=6,min_sample=5):
@@ -45,7 +42,6 @@ class DecisionTree:
         if len(X_y)<=self.min_sample:
             # A leaf node 
             value=self.assign_label(X_y)
-            print("leaf value is ",value)
             return Node(leaf_value=value)
         else:
             # best split gain will be calculated with loops over features and thresholds
@@ -53,6 +49,7 @@ class DecisionTree:
             
             # requirements for division
             if cur_depth<self.max_depth:
+                print("current depth in training is ",cur_depth)
                 right_data=0
                 left_data=0    
                 for feature_number in range(len(self.features)):
@@ -63,7 +60,6 @@ class DecisionTree:
                         Xr,Xl=self.split_by_feature(X_y,feature_number,threshold)
                         if not (X_y is None or Xr is None or Xl is None):
                             if (len(Xr)>=self.min_sample and len(Xl)>=self.min_sample):
-                                print("X_y {} Xr {} Xl {}".format(len(X_y),len(Xr),len(Xl)))
                                 # Now it is time to look the information gain to justify split 
                                 temp=list([row[2] for row in X_y])
                                 temp_r=list([row[2] for row in Xr])
@@ -72,19 +68,20 @@ class DecisionTree:
                                 # Check whether it is the best split 
                                 if split_gain>best_split_gain:
                                     # dataset update
-                                    print("reached")
                                     right_data,left_data=Xr,Xl
                                     best_split_gain=split_gain
                                     idx=self.features[feature_number]
                                     best_threshold=threshold
+                                    print("BEST CASE: X_y {} Xr {} Xl {}".format(len(X_y),len(right_data),len(left_data)))
                             
             if best_split_gain>=self.min_info_gain:
                 # recursive approach to extend 
                 print("Best possible division Xr {} Xl {} best gain {}".format(len(right_data),len(left_data),best_split_gain))
-                right_branch=self.train(right_data,cur_depth+1)
-                left_branch=self.train(left_data,cur_depth+1)
+                cur_depth+=1
+                right_branch=self.train(right_data,cur_depth)
+                left_branch=self.train(left_data,cur_depth)
                 new_node=Node(idx,cur_depth,best_threshold,right_branch,left_branch)
-                print("new node threshold",best_threshold)
+                #print("new node threshold",best_threshold)
                 return new_node
                 
             # this means the node is leaf node
@@ -94,11 +91,9 @@ class DecisionTree:
     def assign_label(self,data):
         """assign most repetitive label as the label of the leaf node"""
         y=[row[2] for row in data]
-        print("y is ",y)
         label=0
         if y.count("1.0")>y.count("0.0"):
             label=1
-        print("The label is ", label)
         return label
     
     # recursive method    
@@ -124,32 +119,28 @@ class DecisionTree:
             
         # Check if it is a leaf node
         if not(node.leaf_value is None):
-            print("sürekli leaf")
+            #print("leaf")
             return node.leaf_value
         
         if (node.right is None or node.left is None):
             print("exception")
-            
-        
-        # thresh is non zero. Checked
+             
         thresh=node.threshold
         feature_i=node.feature_index
-        #print("feature_i ",feature_i)
-        print("value is ",x[feature_i])
         # assign next branch
         if x[feature_i]<=thresh:
-            print("sola kaydı")
+            #print("sola kaydı")
             branch=node.left   
         else:
             branch=node.right
-            print("sağa kaydı")
+            #print("sağa kaydı")
         return self.predict(x,branch)
     
     # calculate info gain 
     def information_gain(self,y,y1,y2):
         prob=len(y1)/len(y)
         info_gain=-self.entropy(y)+self.entropy(y1)*prob+self.entropy(y2)*(1-prob)
-        print("Info gain is ",info_gain )
+        #print("Info gain is ",info_gain )
         return info_gain
     
     # entropy calculation of a node
@@ -174,5 +165,5 @@ class DecisionTree:
         # Filling the array of prediction
         for row in X_test:
             y_predict.append(self.predict(row))
-        print("y predict",y_predict)
+        #print("y predict",y_predict)
         return y_predict

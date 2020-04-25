@@ -30,10 +30,11 @@ split_data(test_data_size,reg_train,class_train,reg_test,class_test)
 # SVM algorithm
 #SVM_machine(class_train,class_test)
 
-# # pca
+# pca
 # PCA(normalizedFile)
 # # kNN algorithm
-# kNN(k,reg_train,reg_test,test_data_size)
+print("kNN INITIALZATION")
+kNN(k,reg_train,reg_test,test_data_size)
 # # implementing random forest
-print(" RANDOM FOREST INITIALIZATION")
-Random_Forest(class_train,class_test) 
+#print(" RANDOM FOREST INITIALIZATION")
+#Random_Forest(class_train,class_test) 
