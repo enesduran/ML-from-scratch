@@ -13,6 +13,6 @@ def f1_score(y_test,y_predicted):
     recall=tp/(fn+tp) 
     precision=tp/(tp+fp)
     f1=2*precision*recall/(precision+recall)
-    print('The recall is {0:.2f} \n'.format(recall))
+    print('\nThe recall is {0:.2f} \n'.format(recall))
     print('The precision is {0:.2f} \n'.format(precision))
     return f1

@@ -56,10 +56,17 @@ def PCA(fileName):
     file=list(csv.reader(file))
     # Serial no and the probability are ignored for PCA 
     arr=np.zeros((500,6))
+    #extracting means 
+    means=np.zeros(6)
+    #np.array(file).astype(np.float)
+    
     for i in range(500):
         for j in range(6):
             arr[i][j]=file[i][j+1]
-    #print(str(arr))          
+            means[j]=np.mean(np.array(file[:][j+1]).astype(np.float))
+        # making mean equal to zero    
+        arr[i][j]=-means[j]
+    # extracting singular values of the centered matrix        
     singular_values=np.linalg.svd(arr, full_matrices=False, compute_uv=False)
     principal_components=np.multiply(singular_values,singular_values)
     print('Lengths of the principal components are '+str(principal_components)+'\n')
@@ -107,9 +114,3 @@ def convertSVM(data_list):
             row[len(row)-1] = "-1.0"
             #new_data_list[i] = row
     return new_data_list
-        
-        
-        
-
-
-

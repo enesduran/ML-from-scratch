@@ -7,7 +7,7 @@ class Node:
             # index of criteria feature for division of branches.
             self.feature_index=feature_index
             # depth of the decision node
-            self.depth=depth
+            #self.depth=depth
             # threshold for division
             self.threshold=threshold
             # the values higher than threshold will be put right node
@@ -22,7 +22,7 @@ class Node:
         
 class DecisionTree:
     
-    def __init__(self,Xy,feature_1,feature_2,min_info_gain,max_depth=6,min_sample=5):
+    def __init__(self,Xy,feature_1,feature_2,min_info_gain,max_depth,min_sample=5):
         # declare a root node to build tree
         feature_names=['GRE','TOEFL','University Rating','SOP','LOR','CGPA','Research']
         self.features=[0,0]
@@ -38,6 +38,7 @@ class DecisionTree:
         self.root=self.train(Xy,0)
                   
     def train(self,X_y,cur_depth):
+        #print("Current depth in training is ",cur_depth)
         """Building tree by constructing nodes. Calls split_by_feature method to split the data """
         if len(X_y)<=self.min_sample:
             # A leaf node 
@@ -46,15 +47,13 @@ class DecisionTree:
         else:
             # best split gain will be calculated with loops over features and thresholds
             best_split_gain=0
-            
             # requirements for division
             if cur_depth<self.max_depth:
-                print("current depth in training is ",cur_depth)
+                
                 right_data=0
                 left_data=0    
                 for feature_number in range(len(self.features)):
                     unique_vals=list(np.unique(np.array(X_y)[:,feature_number]))
-                    #print(unique_vals)
                     for threshold in unique_vals:
                         # Splitted data according to threshold
                         Xr,Xl=self.split_by_feature(X_y,feature_number,threshold)
@@ -72,15 +71,15 @@ class DecisionTree:
                                     best_split_gain=split_gain
                                     idx=self.features[feature_number]
                                     best_threshold=threshold
-                                    print("BEST CASE: X_y {} Xr {} Xl {}".format(len(X_y),len(right_data),len(left_data)))
+                                    #print("CASE: X_y {} Xr {} Xl {}".format(len(X_y),len(right_data),len(left_data)))
                             
             if best_split_gain>=self.min_info_gain:
+                depth=cur_depth+1
                 # recursive approach to extend 
-                print("Best possible division Xr {} Xl {} best gain {}".format(len(right_data),len(left_data),best_split_gain))
-                cur_depth+=1
-                right_branch=self.train(right_data,cur_depth)
-                left_branch=self.train(left_data,cur_depth)
-                new_node=Node(idx,cur_depth,best_threshold,right_branch,left_branch)
+                #print("Best possible division Xr {} Xl {} best gain {}".format(len(right_data),len(left_data),best_split_gain))
+                right_branch=self.train(right_data,depth)
+                left_branch=self.train(left_data,depth)
+                new_node=Node(idx,depth,best_threshold,right_branch,left_branch)
                 #print("new node threshold",best_threshold)
                 return new_node
                 
@@ -94,6 +93,7 @@ class DecisionTree:
         label=0
         if y.count("1.0")>y.count("0.0"):
             label=1
+        #print("The label is",label)
         return label
     
     # recursive method    
