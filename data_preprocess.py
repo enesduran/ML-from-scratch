@@ -2,6 +2,8 @@ import csv
 import random
 import numpy as np
 np.set_printoptions(precision=2)
+X=np.zeros((500,9))
+
 
 def classifier(threshold,fileName,normalizedFile):
     class_new_data=csv.writer(open("Classified_Admission.csv","w",newline=""))
@@ -37,37 +39,33 @@ def split_data(test_data_size,reg_train,class_train,reg_test,class_test):
         reg_test_data.writerow(reg_data[i])
     return 
 
-# shrinking the variables to [0,1] interval
+# making mean of the dataset equal to zero
 def normalize(old_data):
     m=len(old_data)
     n=len(old_data[0])
-    X=np.zeros((m,n))
-    maxValues=np.array([1,340,120,5,5,5,10,1,1])
+    print(m,n)
+    means=np.array([0,0,0,0,0,0,0,0,0])
     # normalization over samples
-    for i in range(m):
+    #.astype(np.float)
+    for j in range(n):
+        print(old_data[:][j])
+        arr=[rows[j] for rows in old_data]
+       
+        means[j]=np.mean( np.array(arr).astype(np.float))
+        print(means)
         # since the last 2 features ranges between (0,1) no need to normalize 
-        for j in range(len(maxValues)):
-            X[i][j]=float(old_data[i][j])/maxValues[j]   
+        for i in range(m):
+            X[i][j]=float(old_data[i][j])
+            # making mean equal to zero
+            if j<8 and j>0:
+                X[i][j]=X[i][j]-means[j]
+    print("means are", means)           
     return X     
 
 # principal component analysis
-def PCA(fileName):
-    file=open(fileName)
-    file=list(csv.reader(file))
-    # Serial no and the probability are ignored for PCA 
-    arr=np.zeros((500,6))
-    #extracting means 
-    means=np.zeros(6)
-    #np.array(file).astype(np.float)
-    
-    for i in range(500):
-        for j in range(6):
-            arr[i][j]=file[i][j+1]
-            means[j]=np.mean(np.array(file[:][j+1]).astype(np.float))
-        # making mean equal to zero    
-        arr[i][j]=-means[j]
-    # extracting singular values of the centered matrix        
-    singular_values=np.linalg.svd(arr, full_matrices=False, compute_uv=False)
+def PCA(fileName='Regression_Admission.csv'):
+    # the dataset is already normalized. We directly compute its SVD       
+    singular_values=np.linalg.svd(X, full_matrices=False, compute_uv=False)
     principal_components=np.multiply(singular_values,singular_values)
     print('Lengths of the principal components are '+str(principal_components)+'\n')
     return

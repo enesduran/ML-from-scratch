@@ -35,8 +35,8 @@ split_data(test_data_size,reg_train,class_train,reg_test,class_test)
 
 
 # Principal Component Analysis
-PCA(normalizedFile)
+PCA()
 
 #Random Forest 
-#print(" RANDOM FOREST INITIALIZATION")
+print(" RANDOM FOREST INITIALIZATION")
 #crossValidationError("RandomForest") 
