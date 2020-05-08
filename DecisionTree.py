@@ -29,8 +29,8 @@ class DecisionTree:
         # feature_1 & 2 are the indexes of the features
         self.features[0]=feature_1
         self.features[1]=feature_2
-        self.feature_name_1=feature_names[feature_1]
-        self.feature_name_2=feature_names[feature_2]
+        self.feature_name_1=feature_names[feature_1-1]
+        self.feature_name_2=feature_names[feature_2-1]
         self.min_info_gain=min_info_gain
         self.Xy=Xy
         self.max_depth=max_depth

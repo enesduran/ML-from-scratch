@@ -8,21 +8,21 @@ from evaluation import f1_score
 class Random_Forest(DecisionTree):
     """Random forest class which consists of Decision_Tree() class"""
     # X is the and y is class label
-    def __init__(self,class_train="Classification_Train.csv",class_test="Classification_Test_Data.csv",max_division=15,min_info_gain=0.0001,number_of_trees=15):
+    def __init__(self,class_train="Classification_Train.csv",class_test="Classification_Test_Data.csv",max_depth=5,min_info_gain=0.03,number_of_trees=15):
         # Labels are appended to X_train & X_test
         self.X_train=list(csv.reader(open(class_train,'r')))
         self.X_test=list(csv.reader(open(class_test,'r')))
         # parameter initialization
         self.number_of_trees=number_of_trees
         self.min_info_gain=min_info_gain
-        self.max_division=max_division
+        self.max_depth=max_depth
         # feature names
         feature_number_for_each_tree=math.floor(math.sqrt(7))
         forest=[]
         # initialization of decision trees 
         for i in range(number_of_trees):
-            feature_indexes=random.sample(range(1,7),feature_number_for_each_tree)
-            tree=DecisionTree(self.get_random_subsets(feature_indexes),feature_indexes[0],feature_indexes[1],min_info_gain,max_division)
+            feature_indexes=random.sample(range(1,8),feature_number_for_each_tree)
+            tree=DecisionTree(self.get_random_subsets(feature_indexes),feature_indexes[0],feature_indexes[1],min_info_gain,max_depth)
             # Decision tree class automatically calls the train method 
             forest.append(tree)
         # making predictions and calculating the f1 score

@@ -1,5 +1,6 @@
 import csv 
 import random
+import math
 import numpy as np
 np.set_printoptions(precision=2)
 X=np.zeros((500,9))
@@ -43,23 +44,27 @@ def split_data(test_data_size,reg_train,class_train,reg_test,class_test):
 def normalize(old_data):
     m=len(old_data)
     n=len(old_data[0])
-    print(m,n)
-    means=np.array([0,0,0,0,0,0,0,0,0])
+    means=np.array([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
+    variances=np.array([1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0])
     # normalization over samples
-    #.astype(np.float)
     for j in range(n):
-        print(old_data[:][j])
         arr=[rows[j] for rows in old_data]
-       
         means[j]=np.mean( np.array(arr).astype(np.float))
-        print(means)
-        # since the last 2 features ranges between (0,1) no need to normalize 
+        # loop 
         for i in range(m):
             X[i][j]=float(old_data[i][j])
             # making mean equal to zero
             if j<8 and j>0:
                 X[i][j]=X[i][j]-means[j]
-    print("means are", means)           
+                variances[j]=variances[j]+(X[i][j]*X[i][j])
+    # We now need to divide it to standard deviations
+    for j in range(n):
+        variances[j]=math.sqrt(variances[j]/(m-1))
+        for j in range(m):
+            # division by std if feature
+            if j<8 and j>0:   
+                X[i][j]=X[i][j]/variances[j]
+    #print("Variance values are",variances)
     return X     
 
 # principal component analysis
