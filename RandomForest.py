@@ -49,5 +49,5 @@ class Random_Forest(DecisionTree):
         return Xy
     
     def returnf1(self):
-        print("F1 score of Random Forest is {0:.2f} \n".format(self.f1))
+        print("f1(RandomForest) = {0:.2f} \n".format(self.f1))
         return self.f1

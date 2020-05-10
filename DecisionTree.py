@@ -38,7 +38,7 @@ class DecisionTree:
         self.root=self.train(Xy,0)
                   
     def train(self,X_y,cur_depth):
-        print("Current depth in training is ",cur_depth)
+        #print("Current depth in training is ",cur_depth)
         """Building tree by constructing nodes. Calls split_by_feature method to split the data """
         if len(X_y)<=self.min_sample:
             # A leaf node 

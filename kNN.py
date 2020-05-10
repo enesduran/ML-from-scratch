@@ -3,6 +3,7 @@ import numpy as numpy
 numpy.set_printoptions(precision=2) 
                     
 def kNN(k,reg_train,reg_test,test_data_size):
+    print("kNN Initialization")
     # changing csv files writer to reader
     reg_train_data=csv.reader(open(reg_train,'r'))
     reg_test_data=csv.reader(open(reg_test,'r'))

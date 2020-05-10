@@ -8,6 +8,7 @@ from evaluation import f1_score
 
 # the main method of support vector machine called by main method
 def SVM_machine(class_train,class_test):
+    print("\nSVM Initialization\n")
     # dividing the train data as input and output for SVM algorithm
     [X, y] = calculateInputOutput(convertSVM(list(csv.reader(open(class_train,'r')))))
     # creating SVM object from SupportVectorMachine class
@@ -24,9 +25,9 @@ def SVM_machine(class_train,class_test):
     print(np.array(y_p))  
     #calculating the prediction error on the test set and printing 
     error  = classError(y_p,y_t)
-    print('The SVM prediction error percentage is {0:.2f} \n'.format(error))
+    print('\nThe SVM prediction error percentage is {0:.2f} \n'.format(error))
     score = f1_score(y_t,y_p)
-    print('The SVM f1 score is {0:.2f} \n'.format(score))
+    print('f1(SVM) = {0:.2f} \n'.format(score))
     return
 
 # the kernel type for linear hyperplane
@@ -82,7 +83,7 @@ class SupportVectorMachine(object):
             del train_data[i*100:(i+1)*100]
             [X,y] = calculateInputOutput(train_data)
             self.fit(X,y)
-        print("betas are:")
+        print("Betas are:")
         print(self.beta)
         return      
     
