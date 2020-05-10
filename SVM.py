@@ -1,9 +1,10 @@
 import csv
 import numpy as np
+import random
 from data_preprocess import calculateInputOutput
 from data_preprocess import convertSVM
-from scipy.optimize import minimize
 from evaluation import f1_score
+
 
 # the main method of support vector machine called by main method
 def SVM_machine(class_train,class_test):
@@ -12,7 +13,8 @@ def SVM_machine(class_train,class_test):
     # creating SVM object from SupportVectorMachine class
     SVM = SupportVectorMachine()
     # fitting the train data to the SVM machine
-    SVM.fit(X, y)
+    # calculating the 5 fold cross validation
+    SVM.crossValidation()
     # dividing the test data as input and output for SVM algorithm
     [X_t, y_t] = calculateInputOutput(convertSVM(list(csv.reader(open(class_test,'r')))))
     # classifying the test data with the SVM machine
@@ -23,11 +25,9 @@ def SVM_machine(class_train,class_test):
     #calculating the prediction error on the test set and printing 
     error  = classError(y_p,y_t)
     print('The SVM prediction error percentage is {0:.2f} \n'.format(error))
-    # calculating the 5 fold cross validation error takes a little time 
-    cross_validation_error = cross_val.crossValidationError()
-    print('The SVM cross validation prediction error is {0:.2f} \n'.format(cross_validation_error))
     score = f1_score(y_t,y_p)
     print('The SVM f1 score is {0:.2f} \n'.format(score))
+    return
 
 # the kernel type for linear hyperplane
 def linear_kernel(x1,x2):
@@ -44,25 +44,47 @@ class SupportVectorMachine(object):
     # initializing the class with kernel type and constraint C(cost parameter)
     def __init__(self, kernel_type=linear_kernel):
         self.kernel = kernel_type
+        self.beta = np.array([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
         return
-    
-    # calcuates the hing loss of all the data samples in the train set  
-    def hinge_loss(self,b):      
-        loss = 0
-        n_samples,n_features = np.shape(self.X)
-        for j in range(n_samples):
-            t = self.kernel(self.X[j],b[0:len(b)-1]) + b[len(b)-1]
-            loss += max(0,1-self.y[j]*t) 
-        return loss    
-    
     # minimizes the hing loss function and finds the hyperplane parameters 
+    # stochastic gradient descent is applied to find the minimum of the loss 
     def fit(self,X,y):
-        self.y= y
-        self.X = X
-        y0 = np.array([1,1,1,1,1,1,1,1])
-        res = minimize(self.hinge_loss, y0, method='nelder-mead')
-        self.beta = res.x
-        return    
+        n_samples,n_features = np.shape(X)
+        #sgd step size
+        gama = 0.01
+        t = 0
+        #sgd batch size
+        m=150
+        #randomizing the sgd samples
+        a = np.arange(400)
+        np.random.shuffle(a)
+        for p in range(m):
+            grad = np.array([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
+            j = a[p]
+            t = np.dot(X[j],self.beta[0:len(self.beta)-1]) + self.beta[len(self.beta)-1]
+            if (t * y[j]) < 1 :
+                for i in range(len(grad)-1):
+                    grad[i] -= X[j][i] * y[j]
+                grad[len(grad)-1] -= y[j]
+                for k in range(len(self.beta)):
+                    self.beta[k] = self.beta[k] - gama * grad[k]
+        return
+            
+    # the cross validation is calculated to find the optimal svm paramters 
+    # 5-fold cross validation is performed
+    # the data set is divided to 5 random subsets and average error is calculated     
+    def crossValidation(self):
+        class_data=convertSVM(list(csv.reader(open("Classified_Admission.csv","r"))))
+        new_data = class_data[:]
+        random.shuffle(new_data)
+        for i in range (0,5):
+            train_data = new_data[:]
+            del train_data[i*100:(i+1)*100]
+            [X,y] = calculateInputOutput(train_data)
+            self.fit(X,y)
+        print("betas are:")
+        print(self.beta)
+        return      
     
     # classification of the test data is performed 
     def predict(self,Xt):
@@ -81,3 +103,7 @@ def classError(y1,y2):
         if y1[i] != y2[i]:
             missNum += 1
     return missNum/len(y1)
+  
+        
+        
+        
